@@ -18,6 +18,7 @@ class RegistrationView(APIView):
             send_mail(
                 'Your OTP Code',
                 f'Your OTP code is {otp_code}. It will expire in 90 seconds.',
+                '',
                 [user.email],
                 fail_silently=False,
             )
