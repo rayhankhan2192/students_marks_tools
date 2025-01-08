@@ -61,6 +61,8 @@ class OTPVerificationView(APIView):
             user = Account.objects.get(email=serializer.validated_data['email'])
             user.is_active = True
             user.save()
+            otp_instance = OTP.objects.filter(user = user).first()
+            otp_instance.delete()
             return Response({'message': 'OTP verified successfully. User activated.'}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
@@ -87,6 +89,8 @@ class ResendOTPView(APIView):
 
                 # Update the existing OTP instance with a new OTP code and time
                 otp_code = get_random_string(length=6, allowed_chars='1234567890')
+                while otp_instance.otp_code == otp_code:
+                    otp_code = get_random_string(length=6, allowed_chars='1234567890')
                 otp_instance.otp_code = otp_code
                 otp_instance.created_at = now()
                 otp_instance.save()
