@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Batch, Section, Student, Quizs, Marks
+from .models import Batch, Section, Student, Quiz, Mark
 
 
 class BatchAdmin(admin.ModelAdmin):
@@ -35,5 +35,5 @@ class MarksAdmin(admin.ModelAdmin):
 admin.site.register(Batch, BatchAdmin)
 admin.site.register(Section, SectionAdmin)
 admin.site.register(Student, StudentAdmin)
-admin.site.register(Quizs, QuizAdmin)
-admin.site.register(Marks, MarksAdmin)
+admin.site.register(Quiz, QuizAdmin)
+admin.site.register(Mark, MarksAdmin)
