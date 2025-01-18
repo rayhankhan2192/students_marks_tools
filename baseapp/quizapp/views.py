@@ -31,9 +31,8 @@ class StudentFilterView(APIView):
         return Response({'message': 'Something went wrong!'}, status=status.HTTP_400_BAD_REQUEST)
     
     def get(self, request, *args, **kwargs):
-        batch_name = request.query_params.get('batch_name')  # Get batch_id from query params
-        section_name = request.query_params.get('section')  # Get section name from query params
-
+        batch_name = request.query_params.get('batch_name')  
+        section_name = request.query_params.get('section') 
         students = Student.objects.all()
 
         if batch_name and section_name:
@@ -52,3 +51,38 @@ class StudentFilterView(APIView):
             return Response({'message': 'Something went wrong!'}, status=status.HTTP_400_BAD_REQUEST)
         serializer = StudentSerializers(students, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    
+    def put(self, request, *args, **kwargs):
+        batch_name = request.query_params.get('batch_name')  
+        section_name = request.query_params.get('section') 
+
+        if not batch_name or not section_name:
+            return Response({'message': 'Batch name and section are required for updating.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        student_id = request.data.get('student_id')  
+        if not student_id:
+            return Response({'message': 'Student ID is required for updating.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            student = Student.objects.get(
+                section__batch_name=batch_name,
+                section__section=section_name,
+                student_id=student_id
+            )
+        except Student.DoesNotExist:
+            return Response({'message': 'No student found with the given criteria.'}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = StudentSerializers(student, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'message': 'Student updated successfully!', 'student': serializer.data}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, student_id, *args, **kwargs):
+        try:
+            student = Student.objects.get(student_id=student_id)
+            student.delete()
+            return Response({'message': 'Student deleted successfully!'}, status=status.HTTP_204_NO_CONTENT)
+        except Student.DoesNotExist:
+            return Response({'message': 'Student not found!'}, status=status.HTTP_404_NOT_FOUND)
