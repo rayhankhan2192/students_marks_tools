@@ -24,7 +24,7 @@ class BatchApiView(APIView):
 class StudentFilterView(APIView):
     def post(self, request):
         data = request.data
-        serializer = StudentSerializers(data = data)
+        serializer = StudentCreateSerializers(data = data)
         if serializer.is_valid():
             serializer.save()
             return Response({'message': 'Save Successfully!'}, status=status.HTTP_201_CREATED)

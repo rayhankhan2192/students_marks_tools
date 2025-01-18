@@ -6,7 +6,12 @@ class BatchSerializers(serializers.ModelSerializer):
     class Meta:
         model = Batch
         fields = ['id', 'batch_name', 'section', 'course_name', 'course_code']
-    
+
+class StudentCreateSerializers(serializers.ModelSerializer):
+    class Meta:
+        model = Student
+        fields = "__all__"
+        
 class StudentSerializers(serializers.ModelSerializer):
     #section = BatchSerializers()
     section = serializers.CharField(source='section.section', read_only = True)
