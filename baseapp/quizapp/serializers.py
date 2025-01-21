@@ -1,11 +1,26 @@
-from .models import Batch, Student
+from .models import Batch, Student, Section, Quiz, QuizResult
 from rest_framework import serializers
 
 
 class BatchSerializers(serializers.ModelSerializer):
     class Meta:
         model = Batch
-        fields = ['id', 'batch_name', 'section', 'course_name', 'course_code']
+        fields = ['batch_name', 'course_name', 'course_code']
+    def validate(self, data):
+        if Batch.objects.filter(
+            batch_name=data['batch_name'],
+            course_name=data['course_name'],
+            course_code=data['course_code']
+        ).exists():
+            raise serializers.ValidationError(
+                "Already exists."
+            )
+        return data
+
+class SectionSerializers(serializers.ModelSerializer):
+    class Meta:
+        model = Section
+        fields = ['section_name', 'batch']
 
 class StudentCreateSerializers(serializers.ModelSerializer):
     class Meta:
@@ -14,9 +29,21 @@ class StudentCreateSerializers(serializers.ModelSerializer):
         
 class StudentSerializers(serializers.ModelSerializer):
     #section = BatchSerializers()
-    section = serializers.CharField(source='section.section', read_only = True)
-    batch = serializers.CharField(source='section.batch_name', read_only = True)
+    # section = serializers.CharField(source='section.section', read_only = True)
+    # batch = serializers.CharField(source='section.batch_name', read_only = True)
     class Meta:
         model = Student
-        fields = ['id', 'student_id', 'marks', 'section', 'batch']
+        # fields = ['student_id', 'marks', 'section', 'batch']
+        fields = ['student_id', 'section']
+        
+class QuizSerializers(serializers.ModelSerializer):
+    class Meta:
+        model = Quiz
+        fields = ['quiz_name', 'section']
+        
+class QuizResultSerializers(serializers.ModelSerializer):
+    class Meta:
+        model = QuizResult
+        fields = ['student', 'quiz', 'marks']
+    
 

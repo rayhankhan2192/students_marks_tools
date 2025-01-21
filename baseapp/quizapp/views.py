@@ -13,13 +13,13 @@ class BatchApiView(APIView):
         if serializer.is_valid():
             serializer.save()
             return Response({'message': 'Save Successfully!'}, status=status.HTTP_201_CREATED)
-        return Response({'message': 'Something went wrong!'}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'message': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
     
     def get(self, request):
         batches = Batch.objects.all()
         serializer = BatchSerializers(batches, many = True)
-        return Response(serializer.data)
-
+        return Response({'message': serializer.errors}, status =status.HTTP_200_OK)
+    
 
 class StudentFilterView(APIView):
     def post(self, request):
