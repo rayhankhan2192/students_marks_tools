@@ -17,13 +17,10 @@ class BatchSerializers(serializers.ModelSerializer):
             )
         return data
 
-class SectionSerializers(serializers.ModelSerializer):
-    batch = serializers.SlugRelatedField(
-        queryset=Batch.objects.all(), slug_field="batch_name"
-    )
+class SectionCreateSerializers(serializers.ModelSerializer):
     class Meta:
         model = Section
-        fields = ['section_name', 'batch']
+        fields = "__all__"
     def validate(self, data):
         if Section.objects.filter(
             section_name = data['section_name'],
@@ -33,23 +30,33 @@ class SectionSerializers(serializers.ModelSerializer):
                 "Already exists."
             )
         return data
-            
 
+class SectionSerializers(serializers.ModelSerializer):
+    batch = serializers.CharField(source='batch.batch_name', read_only=True)
+    class Meta:
+        model = Section
+        fields = ['section_name', 'batch']
+        
 class StudentCreateSerializers(serializers.ModelSerializer):
     class Meta:
         model = Student
         fields = "__all__"
         
 class StudentSerializers(serializers.ModelSerializer):
-    #section = BatchSerializers()
-    # section = serializers.CharField(source='section.section', read_only = True)
-    # batch = serializers.CharField(source='section.batch_name', read_only = True)
+    section = serializers.CharField(source='section.section_name', read_only=True)
+    batch_name = serializers.CharField(source='section.batch_name', read_only=True)
+    
     class Meta:
         model = Student
-        # fields = ['student_id', 'marks', 'section', 'batch']
-        fields = ['student_id', 'section']
+        fields = ['student_id', 'section', 'batch_name']
+
+class QuizCreateSerializers(serializers.ModelSerializer):
+    class Meta:
+        model = Quiz
+        fields = "__all__"
         
 class QuizSerializers(serializers.ModelSerializer):
+    section = serializers.CharField(source='section.section_name', read_only=True)
     class Meta:
         model = Quiz
         fields = ['quiz_name', 'section']

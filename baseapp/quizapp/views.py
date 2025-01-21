@@ -23,7 +23,7 @@ class BatchApiView(APIView):
 class SectionApiView(APIView):
     def post(self, request):
         data = request.data
-        serializer = SectionSerializers(data = data)
+        serializer = SectionCreateSerializers(data = data)
         if serializer.is_valid():
             serializer.save()
             return Response({'message': 'Save Successfully!'}, status=status.HTTP_201_CREATED)
@@ -178,10 +178,43 @@ class QuizApiView(APIView):
             'quiz_name': quiz_name,
             'section': section.id
         }
-        serializer = QuizSerializers(data = quiz_data)
+        serializer = QuizCreateSerializers(data = quiz_data)
         if serializer.is_valid():
             serializer.save()
         return Response(
                 {"message": "Quiz create successfully."}, status=status.HTTP_201_CREATED
             )
         return Response({"message":serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+    
+    def get(self, request):
+        batch_name = request.query_params.get('batch_name')  
+        section_name = request.query_params.get('section_name') 
+        if not batch_name or not section_name:
+            return Response(
+                {"message": "Both 'batch_name' and 'section_name' are required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        try:
+            batch = Batch.objects.get(batch_name=batch_name)
+        except Batch.DoesNotExist:
+            return Response(
+                {"message": f"Batch with name '{batch_name}' does not exist."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        try:
+            section = Section.objects.get(section_name=section_name, batch=batch)
+        except Section.DoesNotExist:
+            return Response(
+                {
+                    "message": f"Section with name '{section_name}' does not exist in batch '{batch_name}'."
+                },
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        students = Quiz.objects.filter(section=section)
+        if not students.exists():
+            return Response(
+                {"message": "No students found in the specified batch and section."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        serializer = QuizSerializers(students, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
