@@ -19,6 +19,7 @@ class Section(models.Model):
     class Meta:
         verbose_name = "Section"
         verbose_name_plural = "Sections"
+        unique_together = ("section_name", "batch")
 
     def __str__(self):
         return f"{self.section_name} ({self.batch.batch_name})"
@@ -41,7 +42,8 @@ class Quiz(models.Model):
 
     class Meta:
         verbose_name = "Quiz"
-        verbose_name_plural = "Quizzes"
+        verbose_name_plural = "Quizes"
+        unique_together = ("quiz_name", "section")
 
     def __str__(self):
         return f"{self.quiz_name} - {self.section.section_name}"
@@ -55,7 +57,7 @@ class QuizResult(models.Model):
     class Meta:
         verbose_name = "Quiz Result"
         verbose_name_plural = "Quiz Results"
-        unique_together = ('student', 'quiz')  # Ensures a student has only one result per quiz
+        unique_together = ('student', 'quiz') 
 
     def __str__(self):
         return f"{self.student.student_id} - {self.quiz.quiz_name}: {self.marks}"

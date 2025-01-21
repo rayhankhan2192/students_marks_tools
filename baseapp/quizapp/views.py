@@ -18,41 +18,100 @@ class BatchApiView(APIView):
     def get(self, request):
         batches = Batch.objects.all()
         serializer = BatchSerializers(batches, many = True)
-        return Response({'message': serializer.errors}, status =status.HTTP_200_OK)
+        return Response(serializer.data, status =status.HTTP_200_OK)
     
+class SectionApiView(APIView):
+    def post(self, request):
+        data = request.data
+        serializer = SectionSerializers(data = data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'message': 'Save Successfully!'}, status=status.HTTP_201_CREATED)
+        return Response({'message': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+    def get(self, request):
+        section = Section.objects.all()
+        serializer = SectionSerializers(section, many = True)
+        return Response(serializer.data, status =status.HTTP_200_OK)
 
 class StudentFilterView(APIView):
     def post(self, request):
         data = request.data
-        serializer = StudentCreateSerializers(data = data)
+        student_id = data.get("student_id")
+        section_name = data.get("section_name")
+        batch_name = data.get("batch_name")
+
+        # Validate required fields
+        if not student_id or not section_name or not batch_name:
+            return Response(
+                {"message": "Fields 'student_id', 'section_name', and 'batch_name' are required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            batch = Batch.objects.get(batch_name=batch_name)
+        except Batch.DoesNotExist:
+            return Response(
+                {"message": f"Batch with name '{batch_name}' does not exist."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        try:
+            section = Section.objects.get(section_name=section_name, batch=batch)
+        except Section.DoesNotExist:
+            return Response(
+                {
+                    "message": f"Section with name '{section_name}' does not exist in batch '{batch_name}'."
+                },
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        # Create a new student in the section
+        student_data = {
+            "student_id": student_id,
+            "section": section.id,
+        }
+
+        serializer = StudentCreateSerializers(data=student_data)
         if serializer.is_valid():
             serializer.save()
-            return Response({'message': 'Save Successfully!'}, status=status.HTTP_201_CREATED)
-        return Response({'message': 'Something went wrong!'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"message": "Student added successfully."}, status=status.HTTP_201_CREATED
+            )
+        return Response({"message":serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
     
     def get(self, request, *args, **kwargs):
         batch_name = request.query_params.get('batch_name')  
-        section_name = request.query_params.get('section') 
-        students = Student.objects.all()
-
-        if batch_name and section_name:
-            students = students.filter(section__batch_name=batch_name, section__section=section_name)
-            if not students.exists():
-                return Response({'message': 'No students found!'}, status=status.HTTP_404_NOT_FOUND)
-        elif batch_name:
-            students = students.filter(section__batch_name=batch_name)
-            if not students.exists():
-                return Response({'message': 'No students found!'}, status=status.HTTP_404_NOT_FOUND)
-        elif section_name:
-            students = students.filter(section__section=section_name)
-            if not students.exists():
-                return Response({'message': 'No students found!'}, status=status.HTTP_404_NOT_FOUND)
-        else:
-            return Response({'message': 'Something went wrong!'}, status=status.HTTP_400_BAD_REQUEST)
+        section_name = request.query_params.get('section_name') 
+        if not batch_name or not section_name:
+            return Response(
+                {"message": "Both 'batch_name' and 'section_name' are required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        try:
+            batch = Batch.objects.get(batch_name=batch_name)
+        except Batch.DoesNotExist:
+            return Response(
+                {"message": f"Batch with name '{batch_name}' does not exist."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        try:
+            section = Section.objects.get(section_name=section_name, batch=batch)
+        except Section.DoesNotExist:
+            return Response(
+                {
+                    "message": f"Section with name '{section_name}' does not exist in batch '{batch_name}'."
+                },
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        students = Student.objects.filter(section=section)
+        if not students.exists():
+            return Response(
+                {"message": "No students found in the specified batch and section."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
         serializer = StudentSerializers(students, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
-    
-    
+        
     def put(self, request, *args, **kwargs):
         batch_name = request.query_params.get('batch_name')  
         section_name = request.query_params.get('section') 
@@ -86,3 +145,43 @@ class StudentFilterView(APIView):
             return Response({'message': 'Student deleted successfully!'}, status=status.HTTP_204_NO_CONTENT)
         except Student.DoesNotExist:
             return Response({'message': 'Student not found!'}, status=status.HTTP_404_NOT_FOUND)
+
+class QuizApiView(APIView):
+    def post(self, request):
+        data = request.data
+        quiz_name = data.get("quiz_name")
+        section_name = data.get("section_name")
+        batch_name = data.get("batch_name")
+        
+        if not quiz_name or not section_name or not batch_name:
+            return Response(
+                {"message": "Fields 'quiz_name', 'section_name', and 'batch_name' are required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        try:
+            batch = Batch.objects.get(batch_name=batch_name)
+        except Batch.DoesNotExist:
+            return Response(
+                {"message": f"Batch with name '{batch_name}' does not exist."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        try:
+            section = Section.objects.get(section_name=section_name, batch=batch)
+        except Section.DoesNotExist:
+            return Response(
+                {
+                    "message": f"Section with name '{section_name}' does not exist in batch '{batch_name}'."
+                },
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        quiz_data = {
+            'quiz_name': quiz_name,
+            'section': section.id
+        }
+        serializer = QuizSerializers(data = quiz_data)
+        if serializer.is_valid():
+            serializer.save()
+        return Response(
+                {"message": "Quiz create successfully."}, status=status.HTTP_201_CREATED
+            )
+        return Response({"message":serializer.errors}, status=status.HTTP_400_BAD_REQUEST)

@@ -5,7 +5,7 @@ from rest_framework import serializers
 class BatchSerializers(serializers.ModelSerializer):
     class Meta:
         model = Batch
-        fields = ['batch_name', 'course_name', 'course_code']
+        fields = ['id','batch_name', 'course_name', 'course_code']
     def validate(self, data):
         if Batch.objects.filter(
             batch_name=data['batch_name'],
@@ -18,9 +18,22 @@ class BatchSerializers(serializers.ModelSerializer):
         return data
 
 class SectionSerializers(serializers.ModelSerializer):
+    batch = serializers.SlugRelatedField(
+        queryset=Batch.objects.all(), slug_field="batch_name"
+    )
     class Meta:
         model = Section
         fields = ['section_name', 'batch']
+    def validate(self, data):
+        if Section.objects.filter(
+            section_name = data['section_name'],
+            batch = data['batch']
+        ).exists():
+            raise serializers.ValidationError(
+                "Already exists."
+            )
+        return data
+            
 
 class StudentCreateSerializers(serializers.ModelSerializer):
     class Meta:
