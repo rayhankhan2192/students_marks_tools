@@ -57,9 +57,10 @@ class QuizCreateSerializers(serializers.ModelSerializer):
         
 class QuizSerializers(serializers.ModelSerializer):
     section = serializers.CharField(source='section.section_name', read_only=True)
+    batch_name = serializers.CharField(source='section.batch', read_only=True)
     class Meta:
         model = Quiz
-        fields = ['quiz_name', 'section']
+        fields = ['quiz_name', 'section', 'batch_name']
         
 class QuizResultSerializers(serializers.ModelSerializer):
     class Meta:

@@ -218,3 +218,53 @@ class QuizApiView(APIView):
             )
         serializer = QuizSerializers(students, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+class QuizMarksApiView(APIView):
+    def get(self, request):
+        batch_name = request.query_params.get('batch_name')  
+        section_name = request.query_params.get('section_name')
+        quiz_name = request.query_params.get('quiz_name')
+        
+        if not batch_name or not section_name or not quiz_name:
+            return Response(
+                {"message": "Both 'batch_name' & 'section_name' & quiz_num are required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        try:
+            batch = Batch.objects.get(batch_name=batch_name)
+        except Batch.DoesNotExist:
+            return Response(
+                {"message": f"Batch with name '{batch_name}' does not exist."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        try:
+            section = Section.objects.get(section_name=section_name, batch=batch)
+        except Section.DoesNotExist:
+            return Response(
+                {
+                    "message": f"Section with name '{section_name}' does not exist in batch '{batch_name}'."
+                },
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        try:
+            quiz = Quiz.objects.get(quiz_name=quiz_name, section=section)
+        except Quiz.DoesNotExist:
+            return Response(
+                {"message": f"Quiz with name '{quiz_name}' does not exist in section '{section_name}'."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        quiz_results = QuizResult.objects.filter(quiz=quiz)
+        if not quiz_results.exists():
+            return Response(
+                {"message": f"No quiz results found for quiz '{quiz_name}' in section '{section_name}'."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        results_data = [
+            {
+                "student_id": result.student.student_id,
+                "marks": result.marks
+            }
+            for result in quiz_results
+        ]
+        return Response(results_data, status=status.HTTP_200_OK)
+        

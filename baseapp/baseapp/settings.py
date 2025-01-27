@@ -26,7 +26,9 @@ SECRET_KEY = 'django-insecure-go&^@8x=nu(3fwzky*mlrschr3oerqknv-d)0^&xcg37m_)&i*
 DEBUG = True
 
 ALLOWED_HOSTS = []
-
+CORS_ALLOWED_ORIGINS = [
+    'http://127.0.0.1:5500',  # Example: Replace with your frontend's origin
+]
 
 # Application definition
 
