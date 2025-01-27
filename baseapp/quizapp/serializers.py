@@ -5,7 +5,7 @@ from rest_framework import serializers
 class BatchSerializers(serializers.ModelSerializer):
     class Meta:
         model = Batch
-        fields = ['id','batch_name', 'course_name', 'course_code']
+        fields = ['batch_name', 'course_name', 'course_code']
     def validate(self, data):
         if Batch.objects.filter(
             batch_name=data['batch_name'],
