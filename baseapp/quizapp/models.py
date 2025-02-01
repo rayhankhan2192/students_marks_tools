@@ -97,7 +97,7 @@ class Student(models.Model):
     section = models.ForeignKey(Section, on_delete=models.CASCADE)
 
     def __str__(self):
-        return f"{self.studentName} ({self.studentId})"
+        return f"{self.studentId}"
 
 class Quiz(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
