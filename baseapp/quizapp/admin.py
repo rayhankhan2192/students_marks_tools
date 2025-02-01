@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Batch, Student, Quiz, QuizResult, Section
+from .models import Batch, Student, Quiz, Section, Subject
 
 
 # class BatchAdmin(admin.ModelAdmin):
@@ -20,5 +20,5 @@ from .models import Batch, Student, Quiz, QuizResult, Section
 admin.site.register(Batch)
 admin.site.register(Student)
 admin.site.register(Quiz)
-admin.site.register(QuizResult)
 admin.site.register(Section)
+admin.site.register(Subject)

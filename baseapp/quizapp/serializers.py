@@ -1,16 +1,14 @@
-from .models import Batch, Student, Section, Quiz, QuizResult
+from .models import Batch, Student, Section, Quiz
 from rest_framework import serializers
 
 
 class BatchSerializers(serializers.ModelSerializer):
     class Meta:
         model = Batch
-        fields = ['batch_name', 'course_name', 'course_code']
+        fields = ['id','batchName']
     def validate(self, data):
         if Batch.objects.filter(
-            batch_name=data['batch_name'],
-            course_name=data['course_name'],
-            course_code=data['course_code']
+            batchName=data['batchName'],
         ).exists():
             raise serializers.ValidationError(
                 "Already exists."
@@ -23,8 +21,8 @@ class SectionCreateSerializers(serializers.ModelSerializer):
         fields = "__all__"
     def validate(self, data):
         if Section.objects.filter(
-            section_name = data['section_name'],
-            batch = data['batch']
+            batch = data['batch'],
+            sectionName = data['sectionName'],
         ).exists():
             raise serializers.ValidationError(
                 "Already exists."
@@ -32,10 +30,10 @@ class SectionCreateSerializers(serializers.ModelSerializer):
         return data
 
 class SectionSerializers(serializers.ModelSerializer):
-    batch = serializers.CharField(source='batch.batch_name', read_only=True)
+    batch = serializers.CharField(source='batch.batchName', read_only=True)
     class Meta:
         model = Section
-        fields = ['section_name', 'batch']
+        fields = ['batch', 'sectionName']
         
 class StudentCreateSerializers(serializers.ModelSerializer):
     class Meta:
@@ -60,11 +58,7 @@ class QuizSerializers(serializers.ModelSerializer):
     batch_name = serializers.CharField(source='section.batch', read_only=True)
     class Meta:
         model = Quiz
-        fields = ['quiz_name', 'section', 'batch_name']
+        fields = ['quiz_name', 'section', 'batch_name', 'course_code']
         
-class QuizResultSerializers(serializers.ModelSerializer):
-    class Meta:
-        model = QuizResult
-        fields = ['student', 'quiz', 'marks']
     
 

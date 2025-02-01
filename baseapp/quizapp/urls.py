@@ -8,5 +8,4 @@ urlpatterns = [
     path('quiz/student-update/', views.StudentFilterView.as_view(), name='student-update'),
     path('quiz/student-delete/<str:student_id>/', views.StudentFilterView.as_view(), name='student-delete'),
     path('quiz/create-quiz/',views.QuizApiView.as_view(), name="create-quiz"),
-    path('quiz/marks/', views.QuizMarksApiView.as_view(), name='marks'),
 ]
