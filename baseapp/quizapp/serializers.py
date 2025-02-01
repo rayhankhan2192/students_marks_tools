@@ -1,4 +1,4 @@
-from .models import Batch, Student, Section, Quiz
+from .models import Batch, Student, Section, Quiz, Subject
 from rest_framework import serializers
 
 
@@ -34,6 +34,11 @@ class SectionSerializers(serializers.ModelSerializer):
     class Meta:
         model = Section
         fields = ['batch', 'sectionName']
+        
+class SubjectSerialisers(serializers.ModelSerializer):
+    class Meta:
+        model = Subject
+        fields = "__all__"
         
 class StudentCreateSerializers(serializers.ModelSerializer):
     class Meta:

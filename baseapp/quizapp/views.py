@@ -32,7 +32,20 @@ class SectionApiView(APIView):
         section = Section.objects.all()
         serializer = SectionSerializers(section, many = True)
         return Response(serializer.data, status =status.HTTP_200_OK)
-
+class SubjectApiView(APIView):
+    def get(self, request):
+        data = request.data
+        subject = Subject.objects.all()
+        serializer = SubjectSerialisers(subject, many = True)
+        return Response(serializer.data, status =status.HTTP_200_OK)
+    def post(self, request):
+        data = request.data
+        serializer = SubjectSerialisers(data = data)
+        if serializer.is_valid():
+            serializer.save()
+        return Response({'message': 'Save Successfully!'}, status=status.HTTP_201_CREATED)
+        return Response({'message': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+    
 class StudentFilterView(APIView):
     def post(self, request):
         data = request.data
@@ -115,18 +128,6 @@ class StudentQuizResultsView(APIView):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        # quiz_results = []
-        # for student in students:
-        #     quizzes = Quiz.objects.filter(student=student, subject__subjectCode=subject_code, quizNo=quiz_no)
-
-        #     quiz_marks = [{"quizNo": q.quizNo, "marks": q.marks} for q in quizzes]
-
-        #     student_info = {
-        #         "id": student.id,
-        #         "studentId": student.studentId,
-        #         "quiz_marks": quiz_marks
-        #     }
-        #     quiz_results.append(student_info)
         quiz_results = []
         for student in students:
             quizzes = Quiz.objects.filter(student=student, subject__subjectCode=subject_code, quizNo=quiz_no)
