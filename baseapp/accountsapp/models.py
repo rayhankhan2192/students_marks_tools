@@ -1,18 +1,16 @@
 from django.db import models
-from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
+from django.contrib.auth.models import BaseUserManager, AbstractBaseUser, PermissionsMixin, Group, Permission
 from django.utils.timezone import now
 from datetime import timedelta
 
 class AccountManager(BaseUserManager):
-    def create_user(self, email, first_name, last_name, password=None, **extra_fields):
+    def create_user(self, email, password=None, **extra_fields):
         if not email:
             raise ValueError('The Email field must be set')
 
         email = self.normalize_email(email)
         user = self.model(
             email=email,
-            first_name=first_name,
-            last_name=last_name,
             **extra_fields
         )
         user.set_password(password)  # Hash the password
@@ -36,7 +34,7 @@ class AccountManager(BaseUserManager):
         return user
 
 
-class Account(AbstractBaseUser):
+class Account(AbstractBaseUser, PermissionsMixin):
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
     email = models.EmailField(max_length=60, unique=True)
@@ -48,10 +46,14 @@ class Account(AbstractBaseUser):
     is_active = models.BooleanField(default=False)
     is_superadmin = models.BooleanField(default=False)
     
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username', 'first_name', 'last_name']
-    
     objects = AccountManager()
+    
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['first_name', 'last_name']
+    
+    
+    groups = models.ManyToManyField(Group, related_name="account_groups")
+    user_permissions = models.ManyToManyField(Permission, related_name="account_permissions")
     
     def full_name(self):
         return f'{self.first_name} {self.last_name}'

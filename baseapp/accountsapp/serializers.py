@@ -1,5 +1,7 @@
 from rest_framework import serializers
 from .models import Account, OTP
+from django.contrib.auth import authenticate
+from django.contrib.auth import get_user_model
 
 class RegistrationSerializer(serializers.ModelSerializer):
     class Meta:
@@ -41,3 +43,23 @@ class OTPVerificationSerializers(serializers.Serializer):
             raise serializers.ValidationError('No OTP found for this user.')
         
         return data
+    
+class LoginSerializer(serializers.Serializer):
+    email = serializers.CharField()
+    password = serializers.CharField(write_only=True)
+
+    # def validate(self, attrs):
+    #     email = attrs.get('email')
+    #     password = attrs.get('password')
+
+    #     user = authenticate(email=email, password=password)
+    #     if user is None:
+    #         raise serializers.ValidationError("Invalid credentials")
+
+    #     attrs['user'] = user
+    #     return attrs
+    
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Account
+        fields = ['id', 'email', 'first_name', 'last_name', 'is_admin', 'is_staff']

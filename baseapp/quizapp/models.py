@@ -1,8 +1,9 @@
 from django.db import models
+from accountsapp.models import Account
 
 class Batch(models.Model):
     batchName = models.CharField(max_length=50)
-
+    auth_users = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='batches')
     def __str__(self):
         return self.batchName
 
@@ -23,7 +24,9 @@ class Subject(models.Model):
 class Student(models.Model):
     studentId = models.CharField(max_length=50)
     section = models.ForeignKey(Section, on_delete=models.CASCADE)
-
+    auth_users = models.ForeignKey(Account, on_delete=models.CASCADE, null=True, 
+    blank=True, related_name='students')
+    
     def __str__(self):
         return f"{self.studentId}"
 
@@ -32,6 +35,8 @@ class Quiz(models.Model):
     subject = models.ForeignKey(Subject, on_delete=models.CASCADE)
     marks = models.PositiveIntegerField(default=0)
     quizNo = models.PositiveIntegerField(default=0)
+    auth_users = models.ForeignKey(Account, on_delete=models.CASCADE,null=True, 
+    blank=True, related_name='quizs')
     
     def __str__(self):
         return f"Quiz: {self.quizNo}-{self.subject.subjectName} {self.student.studentId}"

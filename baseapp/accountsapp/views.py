@@ -5,10 +5,12 @@ from rest_framework import status
 from django.core.mail import send_mail
 from django.utils.crypto import get_random_string
 from .models import Account, OTP
-from .serializers import RegistrationSerializer, OTPVerificationSerializers
+from .serializers import RegistrationSerializer, OTPVerificationSerializers, LoginSerializer, UserSerializer
 from django.db import transaction
 from django.utils.timezone import now
-
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.authtoken.models import Token
+from django.contrib.auth import login
 
 class RegistrationView(APIView):
     # def post(self, request):
@@ -29,7 +31,7 @@ class RegistrationView(APIView):
     #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def post(self, request):
-        serializer = RegistrationSerializer(data=request.data)
+        serializer = RegistrationSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
             
             try:
@@ -104,3 +106,24 @@ class ResendOTPView(APIView):
                 return Response({'message': 'OTP resent successfully.'}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({'message': 'Failed to resend OTP.', 'details': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        
+class LoginView(APIView):
+    def post(self, request, *args, **kwargs):
+        serializer = LoginSerializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.validated_data['user']
+            # You can return the token here if you're using token-based authentication
+            # Example: Use Django REST Framework's Token Authentication
+            return Response({
+                'message': 'Login successful',
+                'email': user.email,
+                'full_name': user.full_name(),
+                'is_admin': user.is_admin,
+            })
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+class UserProfileView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        return Response(UserSerializer(request.user).data, status=status.HTTP_200_OK)
