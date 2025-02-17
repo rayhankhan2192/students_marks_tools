@@ -1,24 +1,6 @@
 from .models import Batch, Student, Section, Quiz, Subject
 from rest_framework import serializers
 
-
-# class BatchSerializers(serializers.ModelSerializer):
-#     class Meta:
-#         model = Batch
-#         fields = ['id','batchName']
-#     def validate(self, data):
-#         if Batch.objects.filter(
-#             batchName=data['batchName'],
-#         ).exists():
-#             raise serializers.ValidationError(
-#                 "Already exists."
-#             )
-#         return data
-    
-#     def create(self, validated_data):
-#         validated_data['auth_users'] = self.context['request'].user
-#         return super().create(validated_data)
-
 class BatchSerializers(serializers.ModelSerializer):
     class Meta:
         model = Batch
