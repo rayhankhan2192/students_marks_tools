@@ -18,6 +18,8 @@ class Section(models.Model):
 class Subject(models.Model):
     subjectName = models.CharField(max_length=100)
     subjectCode = models.CharField(max_length=20)
+    section = models.ForeignKey(Section, on_delete=models.CASCADE, related_name='section')
+    auth_users = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='subject')
 
     def __str__(self):
         return f"{self.subjectName} ({self.subjectCode})"

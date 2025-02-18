@@ -19,7 +19,7 @@ class BatchSerializers(serializers.ModelSerializer):
 class SectionSerializers(serializers.ModelSerializer):
     class Meta:
         model = Section
-        fields = ['batch', 'sectionName']
+        fields = ['id','batch', 'sectionName']
         
     def validate_batch(self, value):
         """Ensure that the batch belongs to the authenticated user."""
@@ -40,16 +40,44 @@ class SectionSerializers(serializers.ModelSerializer):
         validated_data['auth_users'] = user
         return super().create(validated_data)
 
-# class SectionSerializers(serializers.ModelSerializer):
-#     batch = serializers.CharField(source='batch.batchName', read_only=True)
-#     class Meta:
-#         model = Section
-#         fields = ['id','batch', 'sectionName']
         
 class SubjectSerialisers(serializers.ModelSerializer):
+    section = serializers.PrimaryKeyRelatedField(
+        queryset=Section.objects.all(), write_only=True
+    )
+    section_info = serializers.SerializerMethodField()
+
     class Meta:
         model = Subject
-        fields = "__all__"
+        fields = ['id', 'section', 'subjectName', 'subjectCode', 'section_info']
+    def validate_batch(self, value):
+        """Ensure that the batch belongs to the authenticated user."""
+        request = self.context.get('request')
+        user = request.user
+        print("user: ", user)
+        if not Section.objects.filter(id=value.id, auth_users=user).exists():
+            raise serializers.ValidationError("You can only add Subject for section and batches you own.")
+        return value
+    def create(self, validated_data):
+        request = self.context.get('request')
+        if not request or not request.user.is_authenticated:
+            raise serializers.ValidationError("User must be authenticated.")
+        user = request.user
+        if Subject.objects.filter(
+            section = validated_data['section'],
+            subjectName = validated_data['subjectName'],
+            subjectCode = validated_data['subjectCode'],
+            auth_users = user
+            
+        ).exists():
+            raise serializers.ValidationError({"message": "Already exists for this user."})
+        validated_data['auth_users'] = user
+        return super().create(validated_data)
+    
+    def get_section_info(self, obj):
+        if obj.section:
+            return f"{obj.section.sectionName}-{obj.section.batch}"
+        return None
         
 class StudentCreateSerializers(serializers.ModelSerializer):
     class Meta:

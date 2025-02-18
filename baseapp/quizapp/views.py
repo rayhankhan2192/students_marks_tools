@@ -24,6 +24,8 @@ class BatchApiView(APIView):
         return Response(serializer.data, status =status.HTTP_200_OK)
     
 class SectionApiView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
     def post(self, request):
         data = request.data
         serializer = SectionSerializers(data = data, context={'request': request})
@@ -37,14 +39,17 @@ class SectionApiView(APIView):
         return Response(serializer.data, status =status.HTTP_200_OK)
 
 class SubjectApiView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
     def get(self, request):
         data = request.data
-        subject = Subject.objects.all()
+        subject = Subject.objects.filter(auth_users = request.user)
         serializer = SubjectSerialisers(subject, many = True)
         return Response(serializer.data, status =status.HTTP_200_OK)
+    
     def post(self, request):
         data = request.data
-        serializer = SubjectSerialisers(data = data)
+        serializer = SubjectSerialisers(data = data, context={'request': request})
         if serializer.is_valid():
             serializer.save()
             return Response({'message': 'Save Successfully!'}, status=status.HTTP_201_CREATED)
