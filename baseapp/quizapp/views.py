@@ -26,13 +26,13 @@ class BatchApiView(APIView):
 class SectionApiView(APIView):
     def post(self, request):
         data = request.data
-        serializer = SectionCreateSerializers(data = data, context={'request': request})
+        serializer = SectionSerializers(data = data, context={'request': request})
         if serializer.is_valid():
             serializer.save()
             return Response({'message': 'Save Successfully!'}, status=status.HTTP_201_CREATED)
         return Response({'message': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
     def get(self, request):
-        section = Section.objects.all()
+        section = Section.objects.filter(auth_users = request.user)
         serializer = SectionSerializers(section, many = True)
         return Response(serializer.data, status =status.HTTP_200_OK)
 

@@ -16,20 +16,7 @@ class BatchSerializers(serializers.ModelSerializer):
         validated_data['auth_users'] = user  # Assign authenticated user
         return super().create(validated_data)
 
-# class SectionCreateSerializers(serializers.ModelSerializer):
-#     class Meta:
-#         model = Section
-#         fields = "__all__"
-#     def validate(self, data):
-#         if Section.objects.filter(
-#             batch = data['batch'],
-#             sectionName = data['sectionName'],
-#         ).exists():
-#             raise serializers.ValidationError(
-#                 "Already exists."
-#             )
-#         return data
-class SectionCreateSerializers(serializers.ModelSerializer):
+class SectionSerializers(serializers.ModelSerializer):
     class Meta:
         model = Section
         fields = ['batch', 'sectionName']
@@ -48,16 +35,16 @@ class SectionCreateSerializers(serializers.ModelSerializer):
             raise serializers.ValidationError("User must be authenticated.")
         user = request.user
         
-        if Section.objects.filter(sectionName = validated_data['sectionName'], auth_users = user).exists():
-             raise serializers.ValidationError({"message": "This Section name already exists for this user."})
+        if Section.objects.filter(sectionName = validated_data['sectionName'], batch=validated_data['batch'], auth_users = user).exists():
+             raise serializers.ValidationError({"message": "This Section & Batch name already exists for this user."})
         validated_data['auth_users'] = user
         return super().create(validated_data)
 
-class SectionSerializers(serializers.ModelSerializer):
-    batch = serializers.CharField(source='batch.batchName', read_only=True)
-    class Meta:
-        model = Section
-        fields = ['id','batch', 'sectionName']
+# class SectionSerializers(serializers.ModelSerializer):
+#     batch = serializers.CharField(source='batch.batchName', read_only=True)
+#     class Meta:
+#         model = Section
+#         fields = ['id','batch', 'sectionName']
         
 class SubjectSerialisers(serializers.ModelSerializer):
     class Meta:
