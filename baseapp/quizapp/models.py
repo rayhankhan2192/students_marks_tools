@@ -10,6 +10,7 @@ class Batch(models.Model):
 class Section(models.Model):
     batch = models.ForeignKey(Batch, on_delete=models.CASCADE)
     sectionName = models.CharField(max_length=10)
+    auth_users = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='section')
 
     def __str__(self):
         return f"{self.batch.batchName} - {self.sectionName}"
