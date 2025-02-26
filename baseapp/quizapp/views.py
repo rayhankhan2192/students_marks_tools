@@ -56,6 +56,8 @@ class SubjectApiView(APIView):
         return Response({'message': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
     
 class StudentFilterView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
     def post(self, request):
         data = request.data
         serializer = StudentSerializers(data = data,  context={'request': request})
