@@ -58,7 +58,7 @@ class SubjectApiView(APIView):
 class StudentFilterView(APIView):
     def post(self, request):
         data = request.data
-        serializer = StudentCreateSerializers(data = data)
+        serializer = StudentSerializers(data = data,  context={'request': request})
         if serializer.is_valid():
             serializer.save()
             return Response({'message': 'Save Successfully!'}, status=status.HTTP_201_CREATED)
@@ -66,8 +66,8 @@ class StudentFilterView(APIView):
     
     def get(self, request):
         data = request.data
-        student = Student.objects.all()
-        serializer = StudentCreateSerializers(student, many = True)
+        student = Student.objects.filter(auth_users = request.user)
+        serializer = StudentSerializers(student, many = True)
         return Response(serializer.data, status =status.HTTP_200_OK)
         
 class StudentQuizResultsView(APIView):
