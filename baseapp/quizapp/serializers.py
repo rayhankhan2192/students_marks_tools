@@ -135,11 +135,34 @@ class QuizCreateSerializers(serializers.ModelSerializer):
         fields = "__all__"
         
 class QuizSerializers(serializers.ModelSerializer):
-    section = serializers.CharField(source='section.section_name', read_only=True)
-    batch_name = serializers.CharField(source='section.batch', read_only=True)
+    student = serializers.PrimaryKeyRelatedField(queryset = Student.objects.all(), write_only = True)
+    subject = serializers.PrimaryKeyRelatedField(queryset = Subject.objects.all(), write_only = True)
     class Meta:
         model = Quiz
-        fields = ['quiz_name', 'section', 'batch_name', 'course_code']
+        fields = ['student', 'subject', 'marks', 'quizNo']
         
+    def validate(self, value):
+        request = self.context.get('request')
+        user = request.user
+        if not Student.objects.filter(id=value.id, auth_users=user).exists():
+            raise serializers.ValidationError("You can only add Student you own.")
+        if not Subject.objects.filter(id=value.id, auth_user = user).exists():
+            raise serializers.ValidationError("You can only add Subject for Student you own.")
+        return value
     
+    def create(self, validated_data):
+        request = self.context.get('request')
+        if not request or not request.user.is_authenticated:
+            raise serializers.ValidationError("User must be authenticated.")
+        user = request.user
+        if Quiz.objects.filter(
+            student = validated_data['student'],
+            subject = validated_data['subject'],
+            marks = validated_data['marks'],
+            quizNo = validated_data['quizNo'],
+            auth_users = user
+        ).exists():
+            raise serializers.ValidationError({"message": "Already exists for this user."})
+        validated_data['auth_users'] = user
+        return super().create(validated_data)
 
