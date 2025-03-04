@@ -8,6 +8,6 @@ urlpatterns = [
     path('quiz/student-data-create/', views.StudentFilterView.as_view(), name='student-data-create'),
     path('quiz/student-update/', views.StudentFilterView.as_view(), name='student-update'),
     path('quiz/student-delete/<str:student_id>/', views.StudentFilterView.as_view(), name='student-delete'),
-    path('quiz/create-quiz/',views.QuizApiView.as_view(), name="create-quiz"),
-    path('quiz/quizmarks/',views.StudentQuizResultsView.as_view(), name="create-quiz"),
+    path('quiz/create-quiz/',views.QuizApiViews.as_view(), name="create-quiz"),
+    #path('quiz/quizmarks/',views.StudentQuizResultsView.as_view(), name="create-quiz"),
 ]

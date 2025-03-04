@@ -42,5 +42,5 @@ class Quiz(models.Model):
     blank=True, related_name='quizs')
     
     def __str__(self):
-        return f"Quiz: {self.quizNo}-{self.subject.subjectName} {self.student.studentId}"
+        return f"Quiz: {self.quizNo}-{self.subject.subjectName}   Id:{self.student.studentId}    Marks:{self.marks}"
 

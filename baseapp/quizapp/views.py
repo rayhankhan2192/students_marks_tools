@@ -72,10 +72,10 @@ class StudentFilterView(APIView):
         serializer = StudentSerializers(student, many = True)
         return Response(serializer.data, status =status.HTTP_200_OK)
         
-class StudentQuizResultsView(APIView):
+class QuizApiViews(APIView):
     def post(self, request):
         data = request.data
-        serializer = QuizCreateSerializers(data = data)
+        serializer = QuizSerializers(data = data, context={'request': request})
         if serializer.is_valid():
             serializer.save()
             return Response({'message': 'Save Successfully!'}, status=status.HTTP_201_CREATED)

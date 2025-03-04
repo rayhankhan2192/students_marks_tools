@@ -139,14 +139,19 @@ class QuizSerializers(serializers.ModelSerializer):
     subject = serializers.PrimaryKeyRelatedField(queryset = Subject.objects.all(), write_only = True)
     class Meta:
         model = Quiz
-        fields = ['student', 'subject', 'marks', 'quizNo']
+        fields = ['id', 'student', 'subject', 'marks', 'quizNo']
         
-    def validate(self, value):
+    def validate_student(self, value):
         request = self.context.get('request')
         user = request.user
         if not Student.objects.filter(id=value.id, auth_users=user).exists():
             raise serializers.ValidationError("You can only add Student you own.")
-        if not Subject.objects.filter(id=value.id, auth_user = user).exists():
+        return value
+    
+    def validate_subject(self, value):
+        request = self.context.get('request')
+        user = request.user
+        if not Subject.objects.filter(id=value.id, auth_users = user).exists():
             raise serializers.ValidationError("You can only add Subject for Student you own.")
         return value
     
