@@ -160,7 +160,7 @@ class QuizSerializers(serializers.ModelSerializer):
         if Quiz.objects.filter(
             student = validated_data['student'],
             subject = validated_data['subject'],
-            marks = validated_data['marks'],
+            # marks = validated_data['marks'],
             quizNo = validated_data['quizNo'],
             auth_users = user
         ).exists():

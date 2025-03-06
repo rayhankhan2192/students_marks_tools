@@ -98,59 +98,14 @@ class QuizApiViews(APIView):
             quizz = quizz.filter(student__section__sectionName__icontains=section)
         if batch:
             quizz = quizz.filter(student__section__batch__batchName__icontains=batch)
-
+        if not quizz.exists():
+            return Response(
+                {"message": "No quiz data found for the given query."},
+                status=status.HTTP_404_NOT_FOUND
+            )
         serializer = QuizGetSerializers(quizz, many = True)
         return Response(serializer.data, status =status.HTTP_200_OK)
-    # def get(self, request, *args, **kwargs):
-    #     batch_name = request.query_params.get('batch')
-    #     section_name = request.query_params.get('section')
-    #     subject_code = request.query_params.get('subjectCode')
-    #     quiz_no = request.query_params.get('quizNo')
-
-    #     if not batch_name or not section_name or not quiz_no:
-    #         return Response(
-    #             {"message": "Parameters 'batch', 'section', and 'quizNo' are required."},
-    #             status=status.HTTP_400_BAD_REQUEST,
-    #         )
-
-    #     try:
-    #         batch = Batch.objects.get(batchName=batch_name)
-    #     except Batch.DoesNotExist:
-    #         return Response(
-    #             {"message": f"Batch '{batch_name}' does not exist."},
-    #             status=status.HTTP_404_NOT_FOUND,
-    #         )
-
-    #     try:
-    #         section = Section.objects.get(sectionName=section_name, batch=batch)
-    #     except Section.DoesNotExist:
-    #         return Response(
-    #             {"message": f"Section '{section_name}' does not exist in batch '{batch_name}'."},
-    #             status=status.HTTP_404_NOT_FOUND,
-    #         )
-
-    #     students = Student.objects.filter(section=section)
-    #     if not students.exists():
-    #         return Response(
-    #             {"message": "No students found in the specified batch and section."},
-    #             status=status.HTTP_404_NOT_FOUND,
-    #         )
-
-    #     quiz_results = []
-    #     for student in students:
-    #         quizzes = Quiz.objects.filter(student=student, subject__subjectCode=subject_code, quizNo=quiz_no)
-
-    #         for quiz in quizzes:
-    #             quiz_results.append({
-    #                 "quizNo": quiz.quizNo,
-    #                 "studentId": student.studentId,
-    #                 "batch": batch_name,
-    #                 "section": section_name,
-    #                 "subjectCode": subject_code,
-    #                 "marks": quiz.marks
-    #             })
-
-    #     return Response(quiz_results, status=status.HTTP_200_OK)
+    
         
     def put(self, request, *args, **kwargs):
         batch_name = request.query_params.get('batch_name')  
@@ -186,6 +141,10 @@ class QuizApiViews(APIView):
         except Student.DoesNotExist:
             return Response({'message': 'Student not found!'}, status=status.HTTP_404_NOT_FOUND)
 
+
+
+
+"""garbage code"""
 # class QuizApiView(APIView):
 #     def post(self, request):
 #         data = request.data
@@ -260,3 +219,56 @@ class QuizApiViews(APIView):
 #         serializer = QuizSerializers(students, many=True)
 #         return Response(serializer.data, status=status.HTTP_200_OK)
 
+
+
+
+# def get(self, request, *args, **kwargs):
+    #     batch_name = request.query_params.get('batch')
+    #     section_name = request.query_params.get('section')
+    #     subject_code = request.query_params.get('subjectCode')
+    #     quiz_no = request.query_params.get('quizNo')
+
+    #     if not batch_name or not section_name or not quiz_no:
+    #         return Response(
+    #             {"message": "Parameters 'batch', 'section', and 'quizNo' are required."},
+    #             status=status.HTTP_400_BAD_REQUEST,
+    #         )
+
+    #     try:
+    #         batch = Batch.objects.get(batchName=batch_name)
+    #     except Batch.DoesNotExist:
+    #         return Response(
+    #             {"message": f"Batch '{batch_name}' does not exist."},
+    #             status=status.HTTP_404_NOT_FOUND,
+    #         )
+
+    #     try:
+    #         section = Section.objects.get(sectionName=section_name, batch=batch)
+    #     except Section.DoesNotExist:
+    #         return Response(
+    #             {"message": f"Section '{section_name}' does not exist in batch '{batch_name}'."},
+    #             status=status.HTTP_404_NOT_FOUND,
+    #         )
+
+    #     students = Student.objects.filter(section=section)
+    #     if not students.exists():
+    #         return Response(
+    #             {"message": "No students found in the specified batch and section."},
+    #             status=status.HTTP_404_NOT_FOUND,
+    #         )
+
+    #     quiz_results = []
+    #     for student in students:
+    #         quizzes = Quiz.objects.filter(student=student, subject__subjectCode=subject_code, quizNo=quiz_no)
+
+    #         for quiz in quizzes:
+    #             quiz_results.append({
+    #                 "quizNo": quiz.quizNo,
+    #                 "studentId": student.studentId,
+    #                 "batch": batch_name,
+    #                 "section": section_name,
+    #                 "subjectCode": subject_code,
+    #                 "marks": quiz.marks
+    #             })
+
+    #     return Response(quiz_results, status=status.HTTP_200_OK)
