@@ -175,3 +175,9 @@ class QuizGetSerializers(serializers.ModelSerializer):
     class Meta:
         model = Quiz
         fields = ['quizNo','batch', 'section', 'subject','student', 'marks']
+
+class SectionGetSerilizers(serializers.ModelSerializer):
+    batch = serializers.CharField(source = 'batch.batchName')
+    class Meta:
+        model = Section
+        fields = ['sectionName', 'batch']

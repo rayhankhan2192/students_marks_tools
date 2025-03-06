@@ -33,9 +33,19 @@ class SectionApiView(APIView):
             serializer.save()
             return Response({'message': 'Save Successfully!'}, status=status.HTTP_201_CREATED)
         return Response({'message': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+    # def get(self, request):
+    #     section = Section.objects.filter(auth_users = request.user)
+    #     serializer = SectionSerializers(section, many = True)
+    #     return Response(serializer.data, status =status.HTTP_200_OK)
     def get(self, request):
-        section = Section.objects.filter(auth_users = request.user)
-        serializer = SectionSerializers(section, many = True)
+        sections = Section.objects.filter(auth_users = request.user)
+        
+        batch_id = request.query_params.get('batch')
+        
+        if batch_id:
+            # sections = sections.filter(batch__batchName__icontains=batch_id) # query with exact batch name
+            sections = sections.filter(batch_id=batch_id) # query with batch id
+        serializer = SectionGetSerilizers(sections, many = True)
         return Response(serializer.data, status =status.HTTP_200_OK)
 
 class SubjectApiView(APIView):
