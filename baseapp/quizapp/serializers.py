@@ -129,10 +129,7 @@ class StudentSerializers(serializers.ModelSerializer):
 #         model = Student
 #         fields = ['student_id', 'section', 'batch_name']
 
-class QuizCreateSerializers(serializers.ModelSerializer):
-    class Meta:
-        model = Quiz
-        fields = "__all__"
+
         
 class QuizSerializers(serializers.ModelSerializer):
     student = serializers.PrimaryKeyRelatedField(queryset = Student.objects.all(), write_only = True)
@@ -171,3 +168,10 @@ class QuizSerializers(serializers.ModelSerializer):
         validated_data['auth_users'] = user
         return super().create(validated_data)
 
+class QuizGetSerializers(serializers.ModelSerializer):
+    batch = serializers.CharField(source = 'student.section.batch.batchName')
+    section = serializers.CharField(source = 'student.section.sectionName',  read_only=True)
+    subject = serializers.CharField(source = 'subject.subjectName')
+    class Meta:
+        model = Quiz
+        fields = ['quizNo','batch', 'section', 'subject','student', 'marks']
