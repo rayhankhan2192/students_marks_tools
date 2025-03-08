@@ -45,7 +45,7 @@ class SectionApiView(APIView):
         if batch_id:
             # sections = sections.filter(batch__batchName__icontains=batch_id) # query with exact batch name
             sections = sections.filter(batch_id=batch_id) # query with batch id
-        serializer = SectionGetSerilizers(sections, many = True)
+        serializer = SectionSerializers(sections, many = True)
         return Response(serializer.data, status =status.HTTP_200_OK)
 
 class SubjectApiView(APIView):

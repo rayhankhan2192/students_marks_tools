@@ -1,6 +1,6 @@
 from .models import Batch, Student, Section, Quiz, Subject
 from rest_framework import serializers
-
+from rest_framework.response import Response
 class BatchSerializers(serializers.ModelSerializer):
     class Meta:
         model = Batch
@@ -47,17 +47,30 @@ class SubjectSerialisers(serializers.ModelSerializer):
     section = serializers.PrimaryKeyRelatedField(
         queryset=Section.objects.all(), write_only=True
     ) 
-    section_info = serializers.SerializerMethodField()
+    #section_info = serializers.SerializerMethodField()
 
     class Meta:
         model = Subject
-        fields = ['id', 'section', 'subjectName', 'subjectCode', 'section_info']
+        fields = ['id','batch', 'section', 'subjectName', 'subjectCode']
     def validate_batch(self, value):
-        """Ensure that the batch belongs to the authenticated user."""
+        """Ensure that the batch belongs to the authenticated user, that the subject
+        does not already exist for the batch and section, and that the section exists for the batch."""
         request = self.context.get('request')
         user = request.user
+
+        # Check if the batch belongs to the authenticated user
         if not Section.objects.filter(id=value.id, auth_users=user).exists():
             raise serializers.ValidationError("You can only add Subject for section and batches you own.")
+        
+        # Check if the section belongs to the given batch
+        section = self.initial_data.get('section')  # Get the section from the request data
+        if not Section.objects.filter(batch=value, id=section).exists():
+            raise serializers.ValidationError("This section does not exist for the selected batch.")
+
+        # Check if a subject already exists for the given section and batch
+        if Subject.objects.filter(batch=value, section_id=section).exists():
+            raise serializers.ValidationError("A subject already exists for this batch and section.")
+
         return value
     def create(self, validated_data):
         request = self.context.get('request')
@@ -68,6 +81,7 @@ class SubjectSerialisers(serializers.ModelSerializer):
             section = validated_data['section'],
             subjectName = validated_data['subjectName'],
             subjectCode = validated_data['subjectCode'],
+            batch = validated_data['batch'],
             auth_users = user
             
         ).exists():
@@ -75,10 +89,10 @@ class SubjectSerialisers(serializers.ModelSerializer):
         validated_data['auth_users'] = user
         return super().create(validated_data)
     
-    def get_section_info(self, obj):
-        if obj.section:
-            return f"{obj.section.sectionName}-{obj.section.batch}"
-        return None
+    # def get_section_info(self, obj):
+    #     if obj.section:
+    #         return f"{obj.section.sectionName}-{obj.section.batch}"
+    #     return None
         
 class StudentCreateSerializers(serializers.ModelSerializer):
     class Meta:
@@ -176,8 +190,8 @@ class QuizGetSerializers(serializers.ModelSerializer):
         model = Quiz
         fields = ['quizNo','batch', 'section', 'subject','student', 'marks']
 
-class SectionGetSerilizers(serializers.ModelSerializer):
-    batch = serializers.CharField(source = 'batch.batchName')
-    class Meta:
-        model = Section
-        fields = ['sectionName', 'batch']
+# class SectionGetSerilizers(serializers.ModelSerializer):
+#     batch = serializers.CharField(source = 'batch.batchName')
+#     class Meta:
+#         model = Section
+#         fields = ['sectionName', 'batch']
