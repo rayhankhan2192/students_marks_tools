@@ -1,6 +1,6 @@
 from .models import Batch, Student, Section, Quiz, Subject
 from rest_framework import serializers
-from rest_framework.response import Response
+
 class BatchSerializers(serializers.ModelSerializer):
     class Meta:
         model = Batch
@@ -44,10 +44,13 @@ class SectionSerializers(serializers.ModelSerializer):
 class SubjectSerialisers(serializers.ModelSerializer):
     """Makes section writable and available in validated_data.
     Only accepts section IDs from requests."""
-    section = serializers.PrimaryKeyRelatedField(
-        queryset=Section.objects.all(), write_only=True
-    ) 
+    # section = serializers.PrimaryKeyRelatedField(
+    #     queryset=Section.objects.all(), write_only=True
+    # ) 
     #section_info = serializers.SerializerMethodField()
+    
+    # batch = serializers.CharField(source='batch.batchName', read_only=True)
+    # section = serializers.CharField(source='section.sectionName', read_only=True)
 
     class Meta:
         model = Subject
@@ -67,9 +70,9 @@ class SubjectSerialisers(serializers.ModelSerializer):
         if not Section.objects.filter(batch=value, id=section).exists():
             raise serializers.ValidationError("This section does not exist for the selected batch.")
 
-        # Check if a subject already exists for the given section and batch
-        if Subject.objects.filter(batch=value, section_id=section).exists():
-            raise serializers.ValidationError("A subject already exists for this batch and section.")
+        # # Check if a subject already exists for the given section and batch
+        # if Subject.objects.filter(batch=value, section_id=section).exists():
+        #     raise serializers.ValidationError("A subject already exists for this batch and section.")
 
         return value
     def create(self, validated_data):
