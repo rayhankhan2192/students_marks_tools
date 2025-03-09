@@ -64,16 +64,13 @@ class SubjectSerialisers(serializers.ModelSerializer):
         # Check if the batch belongs to the authenticated user
         if not Section.objects.filter(id=value.id, auth_users=user).exists():
             raise serializers.ValidationError("You can only add Subject for section and batches you own.")
-        
         # Check if the section belongs to the given batch
         section = self.initial_data.get('section')  # Get the section from the request data
         if not Section.objects.filter(batch=value, id=section).exists():
             raise serializers.ValidationError("This section does not exist for the selected batch.")
-
         # # Check if a subject already exists for the given section and batch
         # if Subject.objects.filter(batch=value, section_id=section).exists():
         #     raise serializers.ValidationError("A subject already exists for this batch and section.")
-
         return value
     def create(self, validated_data):
         request = self.context.get('request')
@@ -192,9 +189,3 @@ class QuizGetSerializers(serializers.ModelSerializer):
     class Meta:
         model = Quiz
         fields = ['quizNo','batch', 'section', 'subject','student', 'marks']
-
-# class SectionGetSerilizers(serializers.ModelSerializer):
-#     batch = serializers.CharField(source = 'batch.batchName')
-#     class Meta:
-#         model = Section
-#         fields = ['sectionName', 'batch']

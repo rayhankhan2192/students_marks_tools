@@ -51,11 +51,6 @@ class SectionApiView(APIView):
 class SubjectApiView(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [permissions.IsAuthenticated]
-    def get(self, request):
-        data = request.data
-        subject = Subject.objects.filter(auth_users = request.user)
-        serializer = SubjectSerialisers(subject, many = True)
-        return Response(serializer.data, status =status.HTTP_200_OK)
     
     def post(self, request):
         data = request.data
@@ -64,6 +59,25 @@ class SubjectApiView(APIView):
             serializer.save()
             return Response({'message': 'Save Successfully!'}, status=status.HTTP_201_CREATED)
         return Response({'message': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+    # def get(self, request):
+    #     data = request.data
+    #     subject = Subject.objects.filter(auth_users = request.user)
+    #     serializer = SubjectSerialisers(subject, many = True)
+    #     return Response(serializer.data, status =status.HTTP_200_OK)
+    def get(self, request):
+        subjects = Subject.objects.filter(auth_users = request.user).select_related(
+            'section__batch'
+        )
+        batch_id = request.query_params.get('batch')
+        section_id = request.query_params.get('section')
+        if batch_id:
+            subjects = subjects.filter(batch_id = batch_id)
+        if section_id:
+            subjects = subjects.filter(section_id = section_id)
+        if not subjects.exists():
+            return Response({"message": "No data found!"})
+        serializer = SubjectSerialisers(subjects, many = True)
+        return Response(serializer.data, status =status.HTTP_200_OK)
     
 class StudentFilterView(APIView):
     authentication_classes = [JWTAuthentication]
