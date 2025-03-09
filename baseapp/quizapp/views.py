@@ -40,7 +40,7 @@ class SectionApiView(APIView):
     def get(self, request):
         sections = Section.objects.filter(auth_users = request.user)
         
-        batch_id = request.query_params.get('batch')
+        batch_id = request.query_params.get('batch_id')
         
         if batch_id:
             # sections = sections.filter(batch__batchName__icontains=batch_id) # query with exact batch name
