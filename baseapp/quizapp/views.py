@@ -59,11 +59,6 @@ class SubjectApiView(APIView):
             serializer.save()
             return Response({'message': 'Save Successfully!'}, status=status.HTTP_201_CREATED)
         return Response({'message': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
-    # def get(self, request):
-    #     data = request.data
-    #     subject = Subject.objects.filter(auth_users = request.user)
-    #     serializer = SubjectSerialisers(subject, many = True)
-    #     return Response(serializer.data, status =status.HTTP_200_OK)
     def get(self, request):
         subjects = Subject.objects.filter(auth_users = request.user).select_related(
             'section__batch'
@@ -91,9 +86,20 @@ class StudentApiView(APIView):
         return Response({'message': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
     
     def get(self, request):
-        data = request.data
-        student = Student.objects.filter(auth_users = request.user)
-        serializer = StudentSerializers(student, many = True)
+        subject_id = request.query_params.get('subject_id', None)
+        section_id = request.query_params.get('section_id', None)
+        batch_id = request.query_params.get('batch_id', None)
+        
+        students = Student.objects.filter(auth_users = request.user)
+        
+        if subject_id:
+            students = students.filter(subject_id=subject_id)
+        if section_id:
+            students = students.filter(subject__section_id=section_id)
+        if batch_id:
+            students = students.filter(subject__batch_id=batch_id)
+            
+        serializer = StudentSerializers(students, many = True)
         return Response(serializer.data, status =status.HTTP_200_OK)
         
 class QuizApiViews(APIView):

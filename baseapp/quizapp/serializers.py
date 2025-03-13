@@ -100,14 +100,11 @@ class StudentCreateSerializers(serializers.ModelSerializer):
         fields = "__all__"
         
 class StudentSerializers(serializers.ModelSerializer):
-    # section = serializers.PrimaryKeyRelatedField(
-    #     queryset=Section.objects.all(), write_only = True
-    # )
-    #section_info = serializers.SerializerMethodField()
+    subject_info = serializers.SerializerMethodField()
+    #subject = SubjectSerialisers()
     class Meta:
         model = Student
-        # fields = ['id', 'studentId', 'subject', 'section_info']
-        fields = ['id', 'studentId', 'subject']
+        fields = ['id', 'studentId', 'subject', 'subject_info']
         
     def validate_section(self, value):
         request = self.context.get('request')
@@ -130,19 +127,17 @@ class StudentSerializers(serializers.ModelSerializer):
         validated_data['auth_users'] = user
         return super().create(validated_data)
     
-    # def get_section_info(self, obj):
-    #     if obj.section:
-    #         return f"{obj.section.sectionName}-{obj.section.batch}"
-    #     return None
-        
+    def get_subject_info(self, obj):
+        # Fetch more details about the subject related to the student
+        subject = obj.subject
+        # You can customize which fields you want to include from the subject
+        return {
+            'subjectName': subject.subjectName,
+            'subjectCode': subject.subjectCode,
+            'sectionName': subject.section.sectionName,
+            'batchName': subject.batch.batchName,
+        }
 
-# class StudentSerializers(serializers.ModelSerializer):
-#     section = serializers.CharField(source='section.section_name', read_only=True)
-#     batch_name = serializers.CharField(source='section.batch_name', read_only=True)
-    
-#     class Meta:
-#         model = Student
-#         fields = ['student_id', 'section', 'batch_name']
 
 
         
