@@ -27,7 +27,7 @@ class Subject(models.Model):
 
 class Student(models.Model):
     studentId = models.CharField(max_length=50)
-    section = models.ForeignKey(Section, on_delete=models.CASCADE)
+    subject = models.ForeignKey(Subject, on_delete=models.CASCADE, related_name='subject')
     auth_users = models.ForeignKey(Account, on_delete=models.CASCADE, null=True, 
     blank=True, related_name='students')
     

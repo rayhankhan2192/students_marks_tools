@@ -79,7 +79,7 @@ class SubjectApiView(APIView):
         serializer = SubjectSerialisers(subjects, many = True)
         return Response(serializer.data, status =status.HTTP_200_OK)
     
-class StudentFilterView(APIView):
+class StudentApiView(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [permissions.IsAuthenticated]
     def post(self, request):

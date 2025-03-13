@@ -100,19 +100,20 @@ class StudentCreateSerializers(serializers.ModelSerializer):
         fields = "__all__"
         
 class StudentSerializers(serializers.ModelSerializer):
-    section = serializers.PrimaryKeyRelatedField(
-        queryset=Section.objects.all(), write_only = True
-    )
-    section_info = serializers.SerializerMethodField()
+    # section = serializers.PrimaryKeyRelatedField(
+    #     queryset=Section.objects.all(), write_only = True
+    # )
+    #section_info = serializers.SerializerMethodField()
     class Meta:
         model = Student
-        fields = ['id', 'studentId', 'section', 'section_info']
+        # fields = ['id', 'studentId', 'subject', 'section_info']
+        fields = ['id', 'studentId', 'subject']
         
     def validate_section(self, value):
         request = self.context.get('request')
         user = request.user
-        if not Section.objects.filter(id=value.id, auth_users=user).exists():
-            raise serializers.ValidationError("You can only add Subject for section and batches you own.")
+        if not Subject.objects.filter(id=value.id, auth_users=user).exists():
+            raise serializers.ValidationError("You can only add Subject for you own.")
         return value
     
     def create(self, validated_data):
@@ -122,17 +123,17 @@ class StudentSerializers(serializers.ModelSerializer):
         user = request.user
         if Student.objects.filter(
             studentId = validated_data['studentId'],
-            section = validated_data['section'],
+            subject = validated_data['subject'],
             auth_users = user
         ).exists():
             raise serializers.ValidationError({"message": "Already exists for this user."})
         validated_data['auth_users'] = user
         return super().create(validated_data)
     
-    def get_section_info(self, obj):
-        if obj.section:
-            return f"{obj.section.sectionName}-{obj.section.batch}"
-        return None
+    # def get_section_info(self, obj):
+    #     if obj.section:
+    #         return f"{obj.section.sectionName}-{obj.section.batch}"
+    #     return None
         
 
 # class StudentSerializers(serializers.ModelSerializer):
